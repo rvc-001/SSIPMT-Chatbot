@@ -482,7 +482,10 @@
                 try {
                     const response = await fetch(API_URL, {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Cache-Control': 'no-cache'  // <-- THE FIX IS HERE
+                        },
                         body: JSON.stringify({ message: userMessage }),
                     });
                     if (!response.ok) { throw new Error(`HTTP error! Status: ${response.status}`); }
