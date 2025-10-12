@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response # MODIFICATION: Imported Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -117,6 +117,8 @@ async def chat(chat_message: ChatMessage):
 @app.get("/")
 def read_root():
     return {"status": "Chatbot server is running"}
+
+# MODIFICATION: Added a simple HEAD endpoint for health checks
 @app.head("/")
 def status_check():
-    return Response(status_code=200)
+    return Response(status_code=200, headers={"Content-Length": "0"})
