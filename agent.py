@@ -47,8 +47,7 @@ try:
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable not set.")
     genai.configure(api_key=api_key)
-    # MODIFICATION: Updated the model name as requested
-    model = genai.GenerativeModel('gemini-2.0-flash-lite')
+    model = genai.GenerativeModel('gemini-1.5-flash') # Using the latest flash model
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
@@ -118,7 +117,8 @@ async def chat(chat_message: ChatMessage):
 def read_root():
     return {"status": "Chatbot server is running"}
 
-# MODIFICATION: Added a simple HEAD endpoint for health checks
+# --- Health Check Endpoint ---
 @app.head("/")
 def status_check():
-    return Response(status_code=200, headers={"Content-Length": "0"})
+    # Return a response with no body for HEAD requests
+    return Response(status_code=200)
