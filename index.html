@@ -81,7 +81,6 @@
             pointer-events: none;
         }
         
-        /* Speech bubble tail */
         .floating-message::after {
             content: '';
             position: absolute;
@@ -93,9 +92,8 @@
             border-color: transparent transparent transparent var(--ssipmt-dark-blue);
         }
 
-        /* This rule now correctly hides the message */
         body.show-chatbot .floating-message {
-            animation: none; /* Stop the fadeIn animation */
+            animation: none;
             opacity: 0;
             transform: scale(0.7);
         }
@@ -130,12 +128,10 @@
         body.show-chatbot .chatbot-toggler:hover {
             transform: scale(0.8);
         }
-        /* Style for the image inside the toggler */
         .chatbot-toggler img {
-            width: 80%; /* Adjust size as needed */
-            height: 80%; /* Adjust size as needed */
-            object-fit: contain; /* Ensures the image fits without cropping */
-            border-radius: 50%; /* If your image is square, this will make it round */
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
         }
 
         /* --- Chat Container --- */
@@ -254,16 +250,14 @@
             justify-content: center;
             align-items: center;
             flex-shrink: 0;
+            overflow: hidden;
         }
-        /* MODIFICATION: Style for the image inside the avatar */
         .avatar img {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
             object-fit: cover;
         }
         .avatar svg { width: 20px; height: 20px; }
-        /* MODIFICATION: Removed background color to allow image to show */
         .bot-avatar { background-color: transparent; }
         .user-avatar { background-color: #cccccc; }
         .typing-indicator {
@@ -337,7 +331,7 @@
         @keyframes fadeInMessage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
 
-        /* --- MODIFIED: Mobile Responsiveness --- */
+        /* --- Mobile Responsiveness --- */
         @media (max-width: 480px) {
             .chat-container {
                 right: 15px;
@@ -350,7 +344,7 @@
                 bottom: 15px;
             }
             .floating-message {
-                display: none; /* Hide message on small screens to avoid clutter */
+                display: none;
             }
         }
     </style>
@@ -366,7 +360,7 @@
 
     <div class="floating-message">Hello, I am Sankalp, Need Assistance? Chat here</div>
     <button class="chatbot-toggler">
-        <img src="images/chat-icon.png" alt="Message Icon">
+        <img src="images/image.png" alt="Message Icon">
     </button>
     
     <div class="chat-container">
@@ -399,10 +393,12 @@
             const chatbotToggler = document.querySelector(".chatbot-toggler");
             const closeChatBtn = document.querySelector(".close-chat-btn");
 
-            // MODIFICATION: Replaced SVG with an <img> tag for the bot avatar
-            const botAvatarHTML = `<img src="images/chat-icon.png" alt="Bot Icon">`;
+            // MODIFICATION: Corrected image path
+            const botAvatarHTML = `<img src="images/phoenix-sankalp.png" alt="Bot Icon">`;
             const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>`;
-            const API_URL = "http://localhost:8000/chat";
+            
+            // MODIFICATION: Updated API_URL to point to the Render deployment
+            const API_URL = "https://ssipmt-chatbot.onrender.com/chat";
 
             const toggleChatbot = () => document.body.classList.toggle("show-chatbot");
             chatbotToggler.addEventListener("click", toggleChatbot);
@@ -432,7 +428,6 @@
                 messageElement.classList.add('message', `${sender}-message`);
                 const avatar = document.createElement('div');
                 avatar.classList.add('avatar', `${sender}-avatar`);
-                // MODIFICATION: Use the new image-based avatar for the bot
                 avatar.innerHTML = sender === 'bot' ? botAvatarHTML : userIconSVG;
                 const messageContent = document.createElement('div');
                 messageContent.classList.add('message-content');
@@ -459,7 +454,6 @@
                         indicator = document.createElement('div');
                         indicator.id = 'typing-indicator';
                         indicator.classList.add('message', 'bot-message');
-                        // MODIFICATION: Use the new image-based avatar for the typing indicator
                         indicator.innerHTML = `
                             <div class="avatar bot-avatar">${botAvatarHTML}</div>
                             <div class="typing-indicator">
