@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSIPMT Website with Sankalp AI Assistant</title>
+    <style>
+        /* --- Google Fonts & Page Reset --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+        :root {
+            /* === THEME COLORS MATCHED TO SSIPMT WEBSITE === */
+            --ssipmt-orange: #f7941d;
+            --ssipmt-dark-blue: #0f214c;
+            --background-color: #ffffff;
+            --light-gray-bg: #f0f2f5;
+            --border-color: #e0e0e0;
+            --text-color: #333333;
+            --header-text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- Mock Website Body Style --- */
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .mock-website-content {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .mock-website-content h1 {
+            color: var(--ssipmt-dark-blue);
+            border-bottom: 3px solid var(--ssipmt-orange);
+            display: inline-block;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .mock-website-content p {
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        .mock-website-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ======================================= */
+        /* === CHATBOT WIDGET STYLES (FINAL) === */
+        /* ======================================= */
+
+        /* --- Floating Message --- */
+        .floating-message {
+            position: fixed;
+            bottom: 30px;
+            right: 95px; /* Positioned to the left of the toggler */
+            background: var(--ssipmt-dark-blue);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transform-origin: right center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease forwards;
+            animation-delay: 1.5s;
+            pointer-events: none;
+        }
+        
+        /* Speech bubble tail */
+        .floating-message::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -8px;
+            margin-top: -4px;
+            border-width: 4px;
+            border-style: solid;
+            border-color: transparent transparent transparent var(--ssipmt-dark-blue);
+        }
+
+        /* This rule now correctly hides the message */
+        body.show-chatbot .floating-message {
+            animation: none; /* Stop the fadeIn animation */
+            opacity: 0;
+            transform: scale(0.7);
+        }
+
+        /* --- Chat Toggler Button --- */
+        .chatbot-toggler {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background: var(--ssipmt-orange);
+            color: var(--header-text-color);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        body.show-chatbot .chatbot-toggler {
+            transform: scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .chatbot-toggler:hover {
+            transform: scale(1.1);
+        }
+        body.show-chatbot .chatbot-toggler:hover {
+            transform: scale(0.8);
+        }
+        /* Style for the image inside the toggler */
+        .chatbot-toggler img {
+            width: 80%; /* Adjust size as needed */
+            height: 80%; /* Adjust size as needed */
+            object-fit: contain; /* Ensures the image fits without cropping */
+            border-radius: 50%; /* If your image is square, this will make it round */
+        }
+
+        /* --- Chat Container --- */
+        .chat-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 100%;
+            max-width: 360px;
+            max-height: 65vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.9);
+            transform-origin: bottom right;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        body.show-chatbot .chat-container {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* --- Chat Header --- */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--ssipmt-orange);
+            color: var(--header-text-color);
+            position: relative;
+        }
+        .header-content { text-align: left; }
+        .header-title { 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            display: block; 
+        }
+        .header-subtitle { 
+            font-size: 0.8rem; 
+            opacity: 0.9; 
+        }
+        .close-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            padding: 0;
+        }
+        .close-chat-btn:hover { opacity: 1; }
+        
+        /* --- Chat Messages --- */
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background-color: var(--background-color);
+            scrollbar-gutter: stable;
+        }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+        /* --- Individual Message Styling --- */
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            max-width: 85%;
+            animation: fadeInMessage 0.4s ease-in-out;
+        }
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            word-wrap: break-word;
+        }
+        .message-content b { font-weight: 600; color: var(--ssipmt-dark-blue); }
+        .user-message .message-content b { color: white; }
+        .message-content ul { margin: 5px 0 0 0; padding-left: 20px; }
+        .message-content li { margin-bottom: 4px; }
+
+        .bot-message { align-self: flex-start; }
+        .bot-message .message-content {
+            background: var(--light-gray-bg);
+            border-bottom-left-radius: 5px;
+        }
+        .user-message { align-self: flex-end; }
+        .user-message .message-content {
+            background: var(--ssipmt-orange);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        /* MODIFICATION: Style for the image inside the avatar */
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .avatar svg { width: 20px; height: 20px; }
+        /* MODIFICATION: Removed background color to allow image to show */
+        .bot-avatar { background-color: transparent; }
+        .user-avatar { background-color: #cccccc; }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            background: var(--light-gray-bg);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+        }
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            background-color: #999;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        /* --- Chat Input Area --- */
+        .chat-input-area {
+            padding: 10px 12px;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+        }
+        .chat-input-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-input {
+            flex-grow: 1;
+            background: var(--light-gray-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+            height: 48px;
+            min-width: 0;
+        }
+        .chat-input:focus {
+            border-color: var(--ssipmt-orange);
+            box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.2);
+        }
+        .send-button {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: var(--ssipmt-orange);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            flex-shrink: 0;
+        }
+        .send-button:hover { background-color: #e6830d; }
+        .send-button:active {
+            transform: scale(0.95);
+        }
+        .send-button svg { width: 20px; height: 20px; }
+        
+        /* --- Animations --- */
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeInMessage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        /* --- MODIFIED: Mobile Responsiveness --- */
+        @media (max-width: 480px) {
+            .chat-container {
+                right: 15px;
+                bottom: 15px;
+                width: calc(100vw - 30px);
+                max-height: 60vh;
+            }
+             .chatbot-toggler {
+                right: 15px;
+                bottom: 15px;
+            }
+            .floating-message {
+                display: none; /* Hide message on small screens to avoid clutter */
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="mock-website-content">
+        <h1>About SSIPMT</h1>
+        <p>Situated in the heart of the Capital city of Chhattisgarh, SSIPMT, Raipur became an insignia amongst the technical institutions in Central India. We are the only institute in the region & among the only 49 institutes across the country that have been selected for AICTE IDEA Lab 2021 that has created an ecosystem for cutting edge research, creativity and innovation.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
+        <img src="https://i.imgur.com/k6lPqS3.jpeg" alt="SSIPMT Campus Event">
+    </div>
+
+    <div class="floating-message">Hello, I am Sankalp, Need Assistance? Chat here</div>
+    <button class="chatbot-toggler">
+        <img src="images/chat-icon.png" alt="Message Icon">
+    </button>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <span class="header-title">Sankalp - AI Assistant</span>
+                <span class="header-subtitle">Online</span>
+            </div>
+            <button class="close-chat-btn">&times;</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+            <form class="chat-input-form" id="chat-form">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Ask something..." autocomplete="off">
+                <button type="submit" class="send-button" id="send-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24" fill="currentColor">
+                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                    </svg>                      
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatMessages = document.getElementById("chat-messages");
+            const chatForm = document.getElementById("chat-form");
+            const chatInput = document.getElementById("chat-input");
+            const sendBtn = document.getElementById("send-btn");
+            const chatbotToggler = document.querySelector(".chatbot-toggler");
+            const closeChatBtn = document.querySelector(".close-chat-btn");
+
+            // MODIFICATION: Replaced SVG with an <img> tag for the bot avatar
+            const botAvatarHTML = `<img src="images/chat-icon.png" alt="Bot Icon">`;
+            const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>`;
+            const API_URL = "http://localhost:8000/chat";
+
+            const toggleChatbot = () => document.body.classList.toggle("show-chatbot");
+            chatbotToggler.addEventListener("click", toggleChatbot);
+            closeChatBtn.addEventListener("click", toggleChatbot);
+            
+            const formatBotMessage = (text) => {
+                let formattedText = text;
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                const lines = formattedText.split('\n');
+                let inList = false;
+                let html = '';
+                for (const line of lines) {
+                    if (line.trim().startsWith('- ')) {
+                        if (!inList) { html += '<ul>'; inList = true; }
+                        html += `<li>${line.trim().substring(2)}</li>`;
+                    } else {
+                        if (inList) { html += '</ul>'; inList = false; }
+                        html += line + '<br>';
+                    }
+                }
+                if (inList) { html += '</ul>'; }
+                return html.endsWith('<br>') ? html.slice(0, -4) : html;
+            };
+
+            const addMessage = (message, sender) => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', `${sender}-message`);
+                const avatar = document.createElement('div');
+                avatar.classList.add('avatar', `${sender}-avatar`);
+                // MODIFICATION: Use the new image-based avatar for the bot
+                avatar.innerHTML = sender === 'bot' ? botAvatarHTML : userIconSVG;
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                if (sender === 'bot') {
+                    messageContent.innerHTML = formatBotMessage(message);
+                } else {
+                    messageContent.textContent = message;
+                }
+                if (sender === 'user') {
+                    messageElement.appendChild(messageContent);
+                    messageElement.appendChild(avatar);
+                } else {
+                    messageElement.appendChild(avatar);
+                    messageElement.appendChild(messageContent);
+                }
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            const toggleTypingIndicator = (show) => {
+                let indicator = document.getElementById('typing-indicator');
+                if (show) {
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.id = 'typing-indicator';
+                        indicator.classList.add('message', 'bot-message');
+                        // MODIFICATION: Use the new image-based avatar for the typing indicator
+                        indicator.innerHTML = `
+                            <div class="avatar bot-avatar">${botAvatarHTML}</div>
+                            <div class="typing-indicator">
+                                <span></span><span></span><span></span>
+                            </div>
+                        `;
+                        chatMessages.appendChild(indicator);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                } else {
+                    if (indicator) {
+                        indicator.remove();
+                    }
+                }
+            };
+            
+            const handleFormSubmit = async (e) => {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+                if (!userMessage) return;
+
+                addMessage(userMessage, 'user');
+                chatInput.value = '';
+                toggleTypingIndicator(true);
+                sendBtn.disabled = true;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ message: userMessage }),
+                    });
+                    if (!response.ok) { throw new Error(`HTTP error! Status: ${response.status}`); }
+                    const data = await response.json();
+                    toggleTypingIndicator(false);
+                    addMessage(data.reply, 'bot');
+                } catch (error) {
+                    console.error('Error fetching chat response:', error);
+                    toggleTypingIndicator(false);
+                    addMessage("Sorry, I'm having trouble connecting. Please try again later.", 'bot');
+                } finally {
+                    sendBtn.disabled = false;
+                    chatInput.focus();
+                }
+            };
+            
+            chatForm.addEventListener('submit', handleFormSubmit);
+
+            setTimeout(() => {
+                addMessage("Hello! I'm **Sankalp**, your AI assistant for SSIPMT. How can I help you today?", 'bot');
+            }, 500);
+
+            chatInput.addEventListener('focus', () => {
+                if (window.innerWidth <= 480) {
+                    setTimeout(() => {
+                        document.querySelector('.chat-container').scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 300);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
