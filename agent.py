@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response # MODIFICATION: Imported Response
+from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ import json
 import os
 import requests
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, HTTPException, Response
+
 # Load environment variables from .env file FIRST
 load_dotenv()
 
