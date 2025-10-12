@@ -47,7 +47,7 @@ try:
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable not set.")
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash') # Using the latest flash model
+    model = genai.GenerativeModel('gemini-2.0-flash-lite') # Using the latest flash model
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
