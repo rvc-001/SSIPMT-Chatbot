@@ -117,3 +117,6 @@ async def chat(chat_message: ChatMessage):
 @app.get("/")
 def read_root():
     return {"status": "Chatbot server is running"}
+@app.head("/")
+def status_check():
+    return Response(status_code=200)
