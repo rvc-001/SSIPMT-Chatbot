@@ -228,8 +228,17 @@
         }
         .message-content b { font-weight: 600; color: var(--ssipmt-dark-blue); }
         .user-message .message-content b { color: white; }
-        .message-content ul { margin: 5px 0 0 0; padding-left: 20px; }
-        .message-content li { margin-bottom: 4px; }
+        .message-content ul, .message-content ol { margin: 8px 0 0 0; padding-left: 20px; }
+        .message-content li { margin-bottom: 5px; }
+        .message-content a { color: var(--ssipmt-dark-blue); font-weight: 600; }
+        .user-message .message-content a { color: #ffffff; text-decoration: underline; }
+        .message-content code {
+            background-color: rgba(0,0,0,0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
 
         .bot-message { align-self: flex-start; }
         .bot-message .message-content {
@@ -416,22 +425,55 @@
             chatbotToggler.addEventListener("click", toggleChatbot);
             closeChatBtn.addEventListener("click", toggleChatbot);
             
+            // MODIFICATION: Updated function for complete markup support
             const formatBotMessage = (text) => {
-                let formattedText = text;
-                formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                // First, apply inline formatting for links, bold, italics, and code.
+                let formattedText = text
+                    // Links: [text](url)
+                    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                    // Bold: **text**
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                    // Italic: *text*
+                    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                    // Code: `text`
+                    .replace(/`(.*?)`/g, '<code>$1</code>');
+
+                // Then, handle block-level formatting like lists.
                 const lines = formattedText.split('\n');
-                let inList = false;
                 let html = '';
+                let inUl = false;
+                let inOl = false;
+
                 for (const line of lines) {
-                    if (line.trim().startsWith('- ')) {
-                        if (!inList) { html += '<ul>'; inList = true; }
-                        html += `<li>${line.trim().substring(2)}</li>`;
-                    } else {
-                        if (inList) { html += '</ul>'; inList = false; }
-                        html += line + '<br>';
+                    const trimmedLine = line.trim();
+
+                    // Unordered list item: - item
+                    if (trimmedLine.startsWith('- ')) {
+                        if (inOl) { html += '</ol>'; inOl = false; }
+                        if (!inUl) { html += '<ul>'; inUl = true; }
+                        html += `<li>${trimmedLine.substring(2)}</li>`;
+                    } 
+                    // Ordered list item: 1. item
+                    else if (trimmedLine.match(/^\d+\.\s/)) {
+                        if (inUl) { html += '</ul>'; inUl = false; }
+                        if (!inOl) { html += '<ol>'; inOl = true; }
+                        html += `<li>${trimmedLine.replace(/^\d+\.\s/, '')}</li>`;
+                    } 
+                    // Regular line
+                    else {
+                        if (inUl) { html += '</ul>'; inUl = false; }
+                        if (inOl) { html += '</ol>'; inOl = false; }
+                        if (trimmedLine) {
+                            html += trimmedLine + '<br>';
+                        }
                     }
                 }
-                if (inList) { html += '</ul>'; }
+
+                // Close any open lists at the end
+                if (inUl) { html += '</ul>'; }
+                if (inOl) { html += '</ol>'; }
+                
+                // Remove trailing <br> if it exists
                 return html.endsWith('<br>') ? html.slice(0, -4) : html;
             };
 
