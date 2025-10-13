@@ -230,8 +230,8 @@
         .user-message .message-content b { color: white; }
         .message-content ul, .message-content ol { margin: 8px 0 0 0; padding-left: 20px; }
         .message-content li { margin-bottom: 5px; }
-        .message-content a { color: var(--ssipmt-dark-blue); font-weight: 600; }
-        .user-message .message-content a { color: #ffffff; text-decoration: underline; }
+        .message-content a { color: var(--ssipmt-dark-blue); font-weight: 600; text-decoration: underline; }
+        .user-message .message-content a { color: #ffffff; }
         .message-content code {
             background-color: rgba(0,0,0,0.08);
             padding: 2px 6px;
@@ -418,19 +418,25 @@
             const botAvatarHTML = `<img src="images/phoenix-sankalp.png" alt="Bot Icon">`;
             const userIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>`;
             
-            // MODIFICATION: Updated API_URL to point to your Render deployment
             const API_URL = "https://ssipmt-chatbot.onrender.com/chat";
 
             const toggleChatbot = () => document.body.classList.toggle("show-chatbot");
             chatbotToggler.addEventListener("click", toggleChatbot);
             closeChatBtn.addEventListener("click", toggleChatbot);
             
-            // MODIFICATION: Updated function for complete markup support
+            // MODIFICATION: Updated function to parse phone numbers and other markup
             const formatBotMessage = (text) => {
-                // First, apply inline formatting for links, bold, italics, and code.
+                const phoneRegex = /\b(?:(?:(?:\+|00)91[\s-]?)?[6-9]\d{9}|0\d{2,4}-\d{6,8})\b/g;
+
+                // First, apply inline formatting for links, phone numbers, bold, etc.
                 let formattedText = text
                     // Links: [text](url)
                     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                    // Phone numbers
+                    .replace(phoneRegex, (match) => {
+                        const sanitizedNumber = match.replace(/[\s-]/g, '');
+                        return `<a href="tel:${sanitizedNumber}">${match}</a>`;
+                    })
                     // Bold: **text**
                     .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
                     // Italic: *text*
@@ -539,7 +545,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Cache-Control': 'no-cache'  // <-- THE FIX IS HERE
+                            'Cache-Control': 'no-cache'
                         },
                         body: JSON.stringify({ message: userMessage }),
                     });
