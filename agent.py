@@ -6,6 +6,7 @@ import google.generativeai as genai
 import json
 import os
 import requests
+import toons  # Import the TOON library
 from dotenv import load_dotenv
 
 # Load environment variables from .env file FIRST
@@ -79,7 +80,10 @@ async def chat(chat_message: ChatMessage):
 
     # --- Fetch Live Data on Every Request ---
     college_data = fetch_college_data()
-    college_data_string = json.dumps(college_data, indent=2)
+    
+    # MODIFICATION: Use TOON dumps instead of JSON dumps
+    # This removes braces, quotes, and commas to save tokens while keeping structure.
+    college_data_string = toons.dumps(college_data)
 
     # --- System Prompt to handle list data ---
     SYSTEM_PROMPT = f"""
@@ -92,7 +96,7 @@ async def chat(chat_message: ChatMessage):
     - Be robust to spelling and grammatical errors in the user's query. Try to understand the intent.
     - Format your answers clearly, using markdown for bolding and lists when appropriate.
 
-    Here is the college data in JSON format:
+    Here is the college data in TOON (Token-Oriented Object Notation) format:
     ---
     {college_data_string}
     ---
