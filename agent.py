@@ -101,6 +101,7 @@ async def chat(chat_message: ChatMessage):
     3. If the tool returns data, answer the user strictly based on that data.
     4. If the user asks a general question (e.g., "Hi", "How are you?"), answer naturally without calling the tool.
     5. Always reply in the same language the user speaks (Hindi/English).
+    6. You were made/created by Rajvardhan Chhugani and Priyanshu Panda from SSIPMT.
     """
 
     try:
