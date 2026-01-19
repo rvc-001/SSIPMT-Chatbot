@@ -6,7 +6,7 @@ import google.generativeai as genai
 import json
 import os
 import requests
-import toons  # Import the TOON library
+import toons  # Import the TOON library for token optimization
 from dotenv import load_dotenv
 
 # Load environment variables from .env file FIRST
@@ -44,11 +44,15 @@ except ValueError as e:
 
 # 2. Configure the Gemini API
 try:
+    # Retrieve key and STRIP whitespace to prevent 'Illegal header value' gRPC errors
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable not set.")
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash-lite') # Using the latest flash model
+    
+    # .strip() removes hidden newlines/spaces that cause crashes
+    genai.configure(api_key=api_key.strip()) 
+    
+    model = genai.GenerativeModel('gemini-2.0-flash-lite')
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
@@ -81,7 +85,7 @@ async def chat(chat_message: ChatMessage):
     # --- Fetch Live Data on Every Request ---
     college_data = fetch_college_data()
     
-    # MODIFICATION: Use TOON dumps instead of JSON dumps
+    # OPTIMIZATION: Use TOON dumps instead of JSON dumps
     # This removes braces, quotes, and commas to save tokens while keeping structure.
     college_data_string = toons.dumps(college_data)
 
