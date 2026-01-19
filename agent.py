@@ -52,7 +52,7 @@ try:
     # .strip() removes hidden newlines/spaces that cause crashes
     genai.configure(api_key=api_key.strip()) 
     
-    model = genai.GenerativeModel('gemini-2.0-flash-lite')
+    model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     model = None
